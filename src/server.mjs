@@ -42,9 +42,9 @@ async function waterFetch(envKey, base, params, ttl) {
   const id=base+JSON.stringify(params), hit=memo.get(id); if(hit&&Date.now()-hit.at<ttl)return hit.body;
   let key=envKey.trim();if(/%[0-9a-f]{2}/i.test(key)){try{key=decodeURIComponent(key);}catch{}}
   const url=new URL(base);url.search=new URLSearchParams({serviceKey:key,...params});
-  let r;try{r=await fetch(url,{signal:AbortSignal.timeout(20000)});}catch{throw new Error('UPSTREAM_UNAVAILABLE');}
-  if(!r.ok)throw new Error('UPSTREAM_UNAVAILABLE');let j;try{j=await r.json();}catch{throw new Error('API_RESPONSE_ERROR');}
-  if(!['00','0'].includes(String(j.response?.header?.resultCode)))throw new Error('API_RESPONSE_ERROR');
+  let r;try{r=await fetch(url,{signal:AbortSignal.timeout(20000)});}catch{throw Object.assign(new Error('UPSTREAM_UNAVAILABLE'),{upstreamCode:'NETWORK'});}
+  if(!r.ok)throw Object.assign(new Error('UPSTREAM_UNAVAILABLE'),{upstreamCode:'HTTP_'+r.status});let j;const raw=await r.text();try{j=JSON.parse(raw);}catch{const code=raw.match(/<returnReasonCode>([^<]+)</)?.[1];throw Object.assign(new Error('API_RESPONSE_ERROR'),{upstreamCode:code&&/^\d{1,3}$/.test(code)?code:'NON_JSON'});}
+  const resultCode=String(j.response?.header?.resultCode);if(!['00','0'].includes(resultCode))throw Object.assign(new Error('API_RESPONSE_ERROR'),{upstreamCode:/^\d{1,3}$/.test(resultCode)?resultCode:'INVALID_RESPONSE'});
   const body=j.response.body;if(!body)throw new Error('API_RESPONSE_ERROR');if(memo.size>100)memo.clear();memo.set(id,{at:Date.now(),body});return body;
 }
 function list(body){const v=body.items?.item;return Array.isArray(v)?v:v&&typeof v==='object'?[v]:[];}
@@ -70,5 +70,5 @@ export async function waterApi(request,env) {
       result={source:'부산광역시 우리동네 수질 정보 조회',interval:'현재 조회값',district,districtName:districts[district],districts,rows,total:Number(b.totalCount),receivedAt:new Date().toISOString(),measurementTimeProvided:false};
     }
     return Response.json(result,{headers:{'Cache-Control':'private, no-store'}});
-  }catch(e){const known=['KEY_MISSING','UPSTREAM_UNAVAILABLE','API_RESPONSE_ERROR'];return Response.json({error:known.includes(e.message)?e.message:'UPSTREAM_UNAVAILABLE'},{status:503,headers:{'Cache-Control':'no-store'}});}
+  }catch(e){const known=['KEY_MISSING','UPSTREAM_UNAVAILABLE','API_RESPONSE_ERROR'];return Response.json({error:known.includes(e.message)?e.message:'UPSTREAM_UNAVAILABLE',upstreamCode:e.upstreamCode||null},{status:503,headers:{'Cache-Control':'no-store'}});}
 }
