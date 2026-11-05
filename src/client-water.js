@@ -1,4 +1,5 @@
 const $=id=>document.getElementById(id);
+const API_BASE=document.documentElement.dataset.apiBase||'';
 const state={air:{data:null,busy:false,error:''},kw:{data:null,busy:false,error:''},bs:{data:null,busy:false,error:''}};
 const meta={air:{agency:'한국환경공단',label:'초미세먼지',unit:'㎍/㎥',color:'#087f70'},kw:{agency:'K-water',label:'탁도',unit:'NTU',color:'#368ea5'},bs:{agency:'부산광역시',label:'pH',unit:'pH',color:'#7b9445'}};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -49,7 +50,7 @@ function draw(rows,m,key){const good=rows.filter(r=>r.value!==null);if(!good.len
   $('chart').innerHTML='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+m.label+(key==='bs'?' 검사지점별 현재 비교':' 실측 추이')+'. 상세값은 아래 표 참고.">'+svg+'</svg>';
 }
 async function load(key,param){const s=state[key];if(s.busy)return;s.busy=true;render();const routes={air:'/api/air',kw:'/api/kwater',bs:'/api/busan'};try{
-  const r=await fetch(routes[key]+(param?'?'+new URLSearchParams(param):''),{cache:'no-store'}),data=await r.json();if(!r.ok)throw new Error(data.error);s.data=data;s.error='';
+  const r=await fetch(API_BASE+routes[key]+(param?'?'+new URLSearchParams(param):''),{cache:'no-store',credentials:'omit'}),data=await r.json();if(!r.ok)throw new Error(data.error);s.data=data;s.error='';
   if(key==='air'){$('station').replaceChildren(...data.stations.map(r=>opt(r.station,r.station+(r.pm25===null?' · 미수신':''))));$('station').value=data.station;}
   if(key==='kw'){$('kw-plant').replaceChildren(...data.plants.map(p=>opt(p.code,p.name)));$('kw-plant').value=data.plant.code;}
   if(key==='bs'){const old=$('bs-point').value;$('bs-district').replaceChildren(...Object.entries(data.districts).map(([c,n])=>opt(c,n)));$('bs-district').value=data.district;$('bs-point').replaceChildren(...data.rows.map(p=>opt(p.id,p.station+' · 동코드 '+p.dong)));if(data.rows.some(p=>p.id===old))$('bs-point').value=old;}

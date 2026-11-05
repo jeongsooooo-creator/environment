@@ -2,7 +2,7 @@
 
 에어코리아·한국수자원공사·부산광역시 공식 공공데이터를 한곳에서 조회하는 환경 대시보드입니다.
 
-**공개 서비스:** https://environment-busan-public.jeongsooooo.chatgpt.site
+**공개 서비스:** https://jeongsooooo-creator.github.io/environment/
 
 ## 데이터
 
@@ -35,7 +35,9 @@ npm run build
 
 ## 배포
 
-공개 서비스는 **Sites 서버 호스팅**에서 운영하며 이 저장소에는 배포한 애플리케이션 소스를 보관합니다. Sites의 소스 저장소와 GitHub 저장소는 별도로 관리됩니다. **GitHub에 커밋하는 것만으로 현재 공개 서비스가 자동 갱신되지는 않습니다.** 변경 후 같은 소스로 다시 빌드·배포해야 합니다.
+화면은 GitHub Pages의 main 브랜치 /docs 폴더에서 제공합니다. 데이터 조회 서버는 Sites에서 운영합니다. GitHub Pages 화면은 서버의 공개 API를 호출하며 인증키를 포함하지 않습니다. 서버는 이 GitHub Pages 출처에서의 교차 출처 조회를 허용합니다.
+
+화면 수정 후 npm run build로 docs/index.html을 다시 생성하고 docs 폴더를 함께 커밋하면 Pages 화면이 갱신됩니다. 서버 소스를 수정한 경우에는 Sites 서버도 별도로 다시 배포해야 합니다.
 
 호스팅 서버에는 다음 변수를 비밀 설정으로 등록해야 합니다. 실제 값은 저장소에 포함하지 않습니다.
 
