@@ -1,0 +1,12 @@
+{
+  "name": "environment-dashboard",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Official Korean air and water data dashboard",
+  "scripts": {
+    "build": "node build.mjs",
+    "check": "node --check src/server.mjs && node --check src/client-water.js && node --check build.mjs"
+  },
+  "engines": { "node": ">=22" }
+}
