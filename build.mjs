@@ -9,4 +9,5 @@ fs.mkdirSync('docs',{recursive:true});
 const pagesHtml=html.replace('<html lang="ko">','<html lang="ko" data-api-base="https://environment-busan-public.jeongsooooo.chatgpt.site">').replace('<title>','<link rel="canonical" href="https://jeongsooooo-creator.github.io/environment/"><title>');
 fs.writeFileSync('docs/index.html',pagesHtml);fs.writeFileSync('docs/.nojekyll','');
 fs.writeFileSync('index.html',pagesHtml);fs.writeFileSync('.nojekyll','');
+if(fs.existsSync('assets'))fs.cpSync('assets','docs/assets',{recursive:true});
 console.log('Built server and dashboard');
